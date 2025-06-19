@@ -224,3 +224,94 @@ exports.getPropertiesByUserId = async (req, res) => {
     });
   }
 };
+
+exports.deleteProperty = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    const deleted = await propertyModel.deletePropertyById(id);
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ error: "Property not found or already deleted" });
+    }
+
+    res.status(200).json({
+      message: "Property deleted successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error deleting property:", err);
+    res.status(500).json({
+      error: "Failed to delete property",
+      message: err.message,
+    });
+  }
+};
+
+// ✅ UPDATE property by ID
+exports.updateProperty = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    const imageUrls = (req.files?.images || []).map((file) => file.path);
+    const videoUrl = req.files?.video?.[0]?.path || null;
+    const floorPlanUrl = req.files?.floor_plan?.[0]?.path || null;
+
+    let propertyData = {
+      ...req.body,
+      images: imageUrls.length > 0 ? imageUrls : req.body.images,
+      video: videoUrl || req.body.video,
+      floor_plan: floorPlanUrl || req.body.floor_plan,
+    };
+
+    // Parse JSON fields
+    ["nearby", "features", "images"].forEach((key) => {
+      if (typeof propertyData[key] === "string") {
+        try {
+          propertyData[key] = JSON.parse(propertyData[key]);
+        } catch (err) {
+          return res.status(400).json({
+            error: `Invalid JSON format in '${key}' field`,
+          });
+        }
+      }
+    });
+
+    // Remove empty numeric fields
+    ["rooms", "bedrooms", "bathrooms", "age", "latitude", "longitude"].forEach(
+      (field) => {
+        if (propertyData[field] === "") {
+          propertyData[field] = undefined;
+        }
+      }
+    );
+
+    // Validate updated data
+    const validatedData = propertySchema.parse(propertyData);
+
+    const updated = await propertyModel.updatePropertyById(id, validatedData);
+
+    if (!updated) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.status(200).json({
+      message: "Property updated successfully",
+      data: updated,
+    });
+  } catch (err) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: err.errors,
+      });
+    }
+
+    console.error("❌ Error updating property:", err);
+    res.status(500).json({
+      error: "Failed to update property",
+      message: err.message,
+    });
+  }
+};

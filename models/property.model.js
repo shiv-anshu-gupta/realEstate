@@ -208,3 +208,113 @@ exports.getPropertiesByUserId = async (userId) => {
   const { rows } = await pool.query(query, [userId]);
   return rows;
 };
+
+// ✅ Update property by ID
+exports.updatePropertyById = async (id, data) => {
+  const {
+    title,
+    description,
+    status,
+    type,
+    sub_type,
+    rooms,
+    area,
+    price,
+    images,
+    video,
+    floor_plan,
+    address,
+    city,
+    state,
+    country,
+    latitude,
+    longitude,
+    age,
+    bedrooms,
+    bathrooms,
+    features,
+    name,
+    username,
+    email,
+    phone,
+    user_id,
+    nearby,
+  } = data;
+
+  const result = await pool.query(
+    `
+    UPDATE properties SET
+      title = $1,
+      description = $2,
+      status = $3,
+      type = $4,
+      sub_type = $5,
+      rooms = $6,
+      area = $7,
+      price = $8,
+      images = $9,
+      video = $10,
+      floor_plan = $11,
+      address = $12,
+      city = $13,
+      state = $14,
+      country = $15,
+      latitude = $16,
+      longitude = $17,
+      age = $18,
+      bedrooms = $19,
+      bathrooms = $20,
+      features = $21,
+      name = $22,
+      username = $23,
+      email = $24,
+      phone = $25,
+      user_id = $26,
+      nearby = $27
+    WHERE id = $28
+    RETURNING *;
+    `,
+    [
+      title,
+      description,
+      status,
+      type,
+      sub_type,
+      rooms,
+      area,
+      price,
+      images,
+      video,
+      floor_plan,
+      address,
+      city,
+      state,
+      country,
+      latitude,
+      longitude,
+      age,
+      bedrooms,
+      bathrooms,
+      features,
+      name,
+      username,
+      email,
+      phone,
+      user_id,
+      nearby,
+      id,
+    ]
+  );
+
+  return result.rows[0] || null;
+};
+
+// ✅ Delete property by ID
+exports.deletePropertyById = async (id) => {
+  const result = await pool.query(
+    `DELETE FROM properties WHERE id = $1 RETURNING *;`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};

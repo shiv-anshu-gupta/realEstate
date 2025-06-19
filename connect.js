@@ -13,10 +13,14 @@ const pool = new Pool({
     rejectUnauthorized: false, // add this if connecting to cloud DB like Supabase
   },
 });
-
-pool.on("error", (err) => {
-  console.error("Unexpected PostgreSQL error:", err);
-  process.exit(-1);
-});
+pool
+  .query("SELECT NOW()")
+  .then((res) => {
+    console.log("✅ Connected to PostgreSQL database at:", res.rows[0].now);
+  })
+  .catch((err) => {
+    console.error("❌ PostgreSQL connection failed:", err);
+    process.exit(1);
+  });
 
 module.exports = pool;

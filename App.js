@@ -4,6 +4,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const cookieParser = require("cookie-parser");
 
+// ✅ Import the database connection file (this will log the env check)
+require("./connect"); // this runs your DB connection setup
+
 const userRoutes = require("./routes/user.route");
 const propertyRoutes = require("./routes/property.route");
 const contactRoute = require("./routes/contact.route");
@@ -12,8 +15,12 @@ const inquiryRoute = require("./routes/Inquiry.route");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const frontendUrl = process.env.FRONTEND_URL;
+
+// ✅ Log the frontend URL just to double-check it's loaded
+console.log("🌍 FRONTEND_URL =", frontendUrl);
+
 app.use(
   cors({
     origin: frontendUrl,
@@ -35,5 +42,5 @@ app.use("/contact", contactRoute);
 app.use("/Inquiry", inquiryRoute);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

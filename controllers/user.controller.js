@@ -53,11 +53,12 @@ exports.login = async (req, res) => {
       expiresIn: "1d",
     });
 
+    const isProd = process.env.NODE_ENV === "production";
     // Optionally set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd, // false on localhost, true on production
+      sameSite: isProd ? "None" : "Lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
 

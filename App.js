@@ -18,7 +18,6 @@ const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 3000;
 const frontendUrl = process.env.FRONTEND_URL;
 
-// ✅ Log the frontend URL just to double-check it's loaded
 console.log("🌍 FRONTEND_URL =", frontendUrl);
 
 app.use(

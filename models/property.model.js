@@ -204,7 +204,7 @@ exports.getPropertyById = async (id) => {
 };
 
 exports.getPropertiesByUserId = async (userId) => {
-  const query = `SELECT * FROM properties WHERE user_id = $1 ORDER BY created_at DESC`;
+  const query = `SELECT * FROM properties WHERE user_id = $1 ORDER BY listed_at DESC`;
   const { rows } = await pool.query(query, [userId]);
   return rows;
 };

@@ -202,3 +202,25 @@ exports.getRecentProperties = async (req, res) => {
     });
   }
 };
+exports.getPropertiesByUserId = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid or missing userId" });
+    }
+
+    const properties = await propertyModel.getPropertiesByUserId(userId);
+
+    res.status(200).json({
+      message: "Properties fetched successfully",
+      data: properties,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching properties by userId:", err);
+    res.status(500).json({
+      error: "Failed to fetch properties",
+      message: err.message,
+    });
+  }
+};

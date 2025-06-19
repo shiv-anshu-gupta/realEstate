@@ -21,23 +21,8 @@ router.get("/recent", propertyController.getRecentProperties);
 
 router.get("/search", propertyController.searchProperties);
 
-router.get("/my", verifyUser, propertyController.getPropertiesByLoggedInUser);
-
 router.get("/user/:userId", propertyController.getPropertiesByUserId);
 
 router.get("/:id", propertyController.getPropertyById);
-
-router.put(
-  "/:id",
-  upload.fields([
-    { name: "images", maxCount: 10 },
-    { name: "video", maxCount: 1 },
-    { name: "floor_plan", maxCount: 1 },
-  ]),
-  verifyUser,
-  propertyController.updateProperty
-);
-
-router.delete("/:id", verifyUser, propertyController.deleteProperty);
 
 module.exports = router;

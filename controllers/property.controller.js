@@ -1,7 +1,6 @@
-const propertyModel = require("../models/property.model.js");
 const { z } = require("zod");
+const propertyModel = require("../models/property.model");
 
-// ✅ Updated Zod schema
 const propertySchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10).max(5000),
@@ -40,6 +39,19 @@ const propertySchema = z.object({
 });
 
 exports.createProperty = async (req, res) => {
+  console.log("📥 Raw req.body keys:");
+  Object.keys(req.body).forEach((key) => {
+    console.log(`${key} =>`, req.body[key]);
+  });
+
+  console.log("📥 Files received:");
+  console.log("Images:", req.files?.images?.length || 0);
+  console.log("Video:", req.files?.video?.[0]?.originalname || "None");
+  console.log(
+    "Floor Plan:",
+    req.files?.floor_plan?.[0]?.originalname || "None"
+  );
+
   try {
     const imageUrls = (req.files?.images || []).map((file) => file.path);
     const videoUrl = req.files?.video?.[0]?.path || null;
@@ -52,7 +64,7 @@ exports.createProperty = async (req, res) => {
       floor_plan: floorPlanUrl,
     };
 
-    // ✅ Parse 'nearby' and 'features' if sent as JSON strings
+    // ✅ Parse JSON strings (like nearby, features) to objects/arrays
     ["nearby", "features"].forEach((key) => {
       if (typeof propertyData[key] === "string") {
         try {
@@ -60,12 +72,13 @@ exports.createProperty = async (req, res) => {
         } catch (err) {
           return res.status(400).json({
             error: `Invalid JSON format in '${key}' field`,
+            debugValue: propertyData[key],
           });
         }
       }
     });
 
-    // ✅ Remove empty strings from numeric optional fields
+    // ✅ Handle optional numeric fields passed as empty strings
     ["rooms", "bedrooms", "bathrooms", "age", "latitude", "longitude"].forEach(
       (field) => {
         if (propertyData[field] === "") {
@@ -74,13 +87,11 @@ exports.createProperty = async (req, res) => {
       }
     );
 
+    console.log("✅ Parsed propertyData:");
+    console.dir(propertyData, { depth: null });
+
     // ✅ Validate data
     const validatedData = propertySchema.parse(propertyData);
-
-    console.log(
-      "📦 Validated property data:",
-      JSON.stringify(validatedData, null, 2)
-    );
 
     const newProperty = await propertyModel.insertProperty(validatedData);
 
@@ -90,17 +101,17 @@ exports.createProperty = async (req, res) => {
     });
   } catch (err) {
     if (err.name === "ZodError") {
+      console.error("❌ Zod validation failed:", err.errors);
       return res.status(400).json({
         error: "Validation failed",
         details: err.errors,
       });
     }
 
-    console.error("❌ Error creating property:", err);
+    console.error("❌ Internal Server Error:", err);
     res.status(500).json({
       error: "Failed to create property",
       message: err.message,
-      pgCode: err.code,
       stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
     });
   }

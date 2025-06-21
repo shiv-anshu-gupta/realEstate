@@ -2,11 +2,12 @@ const pool = require("./connect.js");
 
 async function createTables() {
   try {
-    // Drop tables if they already exist (in correct order to respect FK constraints)
+    // Drop tables in order to avoid foreign key conflicts
+    await pool.query(`DROP TABLE IF EXISTS tours;`);
     await pool.query(`DROP TABLE IF EXISTS properties;`);
     await pool.query(`DROP TABLE IF EXISTS users;`);
 
-    // Create users table
+    // Users Table
     await pool.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -20,7 +21,7 @@ async function createTables() {
       );
     `);
 
-    // Create properties table
+    // Properties Table
     await pool.query(`
       CREATE TABLE properties (
         id SERIAL PRIMARY KEY,
@@ -55,10 +56,24 @@ async function createTables() {
         email TEXT,
         phone TEXT,
 
-        nearby JSONB,  -- ✅ Optional field to store nearby places (education, health, etc.)
+        nearby JSONB,
 
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         listed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // ✅ Tours Table
+    await pool.query(`
+      CREATE TABLE tours (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
+        tour_date DATE NOT NULL,
+        tour_time TIME NOT NULL,
+        message TEXT,
+        status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -66,7 +81,7 @@ async function createTables() {
   } catch (err) {
     console.error("❌ Error creating tables:", err);
   } finally {
-    pool.end(); // close DB connection
+    pool.end(); // Close DB connection
   }
 }
 

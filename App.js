@@ -11,7 +11,7 @@ const userRoutes = require("./routes/user.route");
 const propertyRoutes = require("./routes/property.route");
 const contactRoute = require("./routes/contact.route");
 const inquiryRoute = require("./routes/Inquiry.route");
-
+const tourRoute = require("./routes/tour.route");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
@@ -39,6 +39,7 @@ app.use("/property", propertyRoutes);
 app.use("/user", userRoutes);
 app.use("/contact", contactRoute);
 app.use("/Inquiry", inquiryRoute);
+app.use("/tour", tourRoute);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

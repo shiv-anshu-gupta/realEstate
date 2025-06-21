@@ -3,26 +3,28 @@ const app = express();
 const dotenv = require("dotenv");
 dotenv.config();
 const cookieParser = require("cookie-parser");
-
-// ✅ Import the database connection file (this will log the env check)
-require("./connect"); // this runs your DB connection setup
-
-const userRoutes = require("./routes/user.route");
-const propertyRoutes = require("./routes/property.route");
-const contactRoute = require("./routes/contact.route");
-const inquiryRoute = require("./routes/Inquiry.route");
-const tourRoute = require("./routes/tour.route");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
+// 🌐 Parse allowed origins from .env
+const allowedOrigins = process.env.FRONTEND_URLS
+  ? process.env.FRONTEND_URLS.split(",").map((url) => url.trim())
+  : [];
+
 const PORT = process.env.PORT || 3000;
-const frontendUrl = process.env.FRONTEND_URL;
 
-console.log("🌍 FRONTEND_URL =", frontendUrl);
+console.log("🌍 Allowed Frontend URLs:", allowedOrigins);
 
+// ✅ Setup dynamic CORS
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("❌ CORS Not Allowed: " + origin));
+      }
+    },
     credentials: true,
   })
 );
@@ -30,6 +32,16 @@ app.use(
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// ✅ DB connection
+require("./connect");
+
+// ✅ Routes
+const userRoutes = require("./routes/user.route");
+const propertyRoutes = require("./routes/property.route");
+const contactRoute = require("./routes/contact.route");
+const inquiryRoute = require("./routes/Inquiry.route");
+const tourRoute = require("./routes/tour.route");
 
 app.get("/", (req, res) => {
   res.send("Welcome to the backend server!");

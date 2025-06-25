@@ -22,7 +22,7 @@ router.get("/", propertyController.getAllProperties);
 // ✅ Get recent properties
 router.get("/recent", propertyController.getRecentProperties);
 
-// ✅ Search properties
+// ✅ Search properties with query
 router.get("/search", propertyController.searchProperties);
 
 // ✅ Get properties by user ID
@@ -45,5 +45,51 @@ router.put(
 
 // ✅ Delete property by ID
 router.delete("/:id", verifyUser, propertyController.deleteProperty);
+
+//
+// 🚀 NEW: Listing Filter Routes (Predefined Searches)
+//
+
+router.get("/listings/buy", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, type: "sale" } },
+    res
+  )
+);
+
+router.get("/listings/rent", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, type: "rent" } },
+    res
+  )
+);
+
+router.get("/listings/office", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, sub_type: "office" } },
+    res
+  )
+);
+
+router.get("/listings/aggricultural", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, sub_type: "aggricultural" } },
+    res
+  )
+);
+
+router.get("/listings/plots", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, sub_type: "plot" } },
+    res
+  )
+);
+
+router.get("/listings/new-projects", (req, res) =>
+  propertyController.searchProperties(
+    { ...req, query: { ...req.query, sub_type: "new-project" } },
+    res
+  )
+);
 
 module.exports = router;

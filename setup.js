@@ -2,14 +2,9 @@ const pool = require("./connect.js");
 
 async function createTables() {
   try {
-    // Drop tables in order to avoid foreign key conflicts
-    await pool.query(`DROP TABLE IF EXISTS tours;`);
-    await pool.query(`DROP TABLE IF EXISTS properties;`);
-    await pool.query(`DROP TABLE IF EXISTS users;`);
-
-    // Users Table
+    // USERS table
     await pool.query(`
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
@@ -21,9 +16,9 @@ async function createTables() {
       );
     `);
 
-    // Properties Table
+    // PROPERTIES table
     await pool.query(`
-      CREATE TABLE properties (
+      CREATE TABLE IF NOT EXISTS properties (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT,
@@ -63,9 +58,9 @@ async function createTables() {
       );
     `);
 
-    // ✅ Tours Table
+    // TOURS table
     await pool.query(`
-      CREATE TABLE tours (
+      CREATE TABLE IF NOT EXISTS tours (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
@@ -77,7 +72,18 @@ async function createTables() {
       );
     `);
 
-    console.log("✅ Tables created and updated successfully.");
+    // ✅ WISHLIST table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS wishlist (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, property_id) -- prevents duplicate wishlists
+      );
+    `);
+
+    console.log("✅ Tables created/ensured successfully.");
   } catch (err) {
     console.error("❌ Error creating tables:", err);
   } finally {

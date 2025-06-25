@@ -5,7 +5,7 @@ dotenv.config();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const wishlistRoutes = require("./routes/wishlist.routes");
 // 🌐 Parse allowed origins from .env
 const allowedOrigins = process.env.FRONTEND_URLS
   ? process.env.FRONTEND_URLS.split(",").map((url) => url.trim())
@@ -52,7 +52,7 @@ app.use("/user", userRoutes);
 app.use("/contact", contactRoute);
 app.use("/Inquiry", inquiryRoute);
 app.use("/tour", tourRoute);
-
+app.use("/wishlist", wishlistRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });

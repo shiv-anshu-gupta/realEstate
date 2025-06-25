@@ -326,3 +326,107 @@ exports.updateProperty = async (req, res) => {
     });
   }
 };
+
+exports.getBuyProperties = async (req, res) => {
+  try {
+    const buyProps = await propertyModel.searchProperties({ type: "buy" });
+    res.status(200).json({
+      message: "Buy properties fetched successfully",
+      data: buyProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching buy properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch buy properties",
+      message: err.message,
+    });
+  }
+};
+
+exports.getRentProperties = async (req, res) => {
+  try {
+    const rentProps = await propertyModel.searchProperties({ type: "rent" });
+    res.status(200).json({
+      message: "Rent properties fetched successfully",
+      data: rentProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching rent properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch rent properties",
+      message: err.message,
+    });
+  }
+};
+
+exports.getOfficeProperties = async (req, res) => {
+  try {
+    const officeProps = await propertyModel.searchProperties({
+      sub_type: "office",
+    });
+    res.status(200).json({
+      message: "Office properties fetched successfully",
+      data: officeProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching office properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch office properties",
+      message: err.message,
+    });
+  }
+};
+
+exports.getAggreculturalProperties = async (req, res) => {
+  try {
+    const agProps = await propertyModel.searchProperties({
+      sub_type: "aggricultural",
+    });
+    res.status(200).json({
+      message: "Aggrecultural properties fetched successfully",
+      data: agProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching aggricultural properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch aggricultural properties",
+      message: err.message,
+    });
+  }
+};
+
+exports.getPlotProperties = async (req, res) => {
+  try {
+    const plotProps = await propertyModel.searchProperties({
+      sub_type: "plots",
+    });
+    res.status(200).json({
+      message: "Plot properties fetched successfully",
+      data: plotProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching plot properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch plot properties",
+      message: err.message,
+    });
+  }
+};
+
+exports.getNewProjectProperties = async (req, res) => {
+  try {
+    const newProps = await propertyModel.searchProperties({
+      sub_type: "new-project",
+    });
+    res.status(200).json({
+      message: "New project properties fetched successfully",
+      data: newProps,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching new project properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch new project properties",
+      message: err.message,
+    });
+  }
+};

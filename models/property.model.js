@@ -181,6 +181,12 @@ exports.countFilteredProperties = async (filters) => {
 
 // Get property by ID
 exports.getPropertyById = async (id) => {
+  const numericId = Number(id);
+
+  if (!Number.isInteger(numericId)) {
+    throw new Error(`Invalid property ID: ${id}`);
+  }
+
   try {
     const result = await pool.query(
       `
@@ -193,7 +199,7 @@ exports.getPropertyById = async (id) => {
       FROM properties
       WHERE id = $1
       `,
-      [id]
+      [numericId]
     );
 
     return result.rows[0] || null;

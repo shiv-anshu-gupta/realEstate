@@ -318,3 +318,24 @@ exports.deletePropertyById = async (id) => {
 
   return result.rows[0] || null;
 };
+
+// ✅ Get all properties with wishlistedBy (array of user_ids)
+exports.getAllPropertiesWithWishlist = async () => {
+  const result = await pool.query(`
+    SELECT 
+      p.*,
+      COALESCE(
+        ARRAY_AGG(w.user_id) FILTER (WHERE w.user_id IS NOT NULL),
+        '{}'
+      ) AS wishlisted_by
+    FROM properties p
+    LEFT JOIN wishlist w ON p.id = w.property_id
+    GROUP BY p.id
+    ORDER BY p.listed_at DESC;
+  `);
+
+  return result.rows.map((row) => ({
+    ...row,
+    wishlistedBy: row.wishlisted_by, // ✅ cleaner key for frontend
+  }));
+};

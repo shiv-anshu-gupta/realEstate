@@ -92,4 +92,6 @@ router.get("/listings/new-projects", (req, res) =>
   )
 );
 
+router.get("/with-wishlist", propertyController.getPropertiesWithWishlist);
+
 module.exports = router;

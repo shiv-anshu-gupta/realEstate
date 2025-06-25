@@ -430,3 +430,19 @@ exports.getNewProjectProperties = async (req, res) => {
     });
   }
 };
+
+exports.getPropertiesWithWishlist = async (req, res) => {
+  try {
+    const properties = await propertyModel.getAllPropertiesWithWishlist();
+    res.status(200).json({
+      message: "Properties with wishlist fetched successfully",
+      data: properties,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching wishlist properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch properties with wishlist",
+      message: err.message,
+    });
+  }
+};

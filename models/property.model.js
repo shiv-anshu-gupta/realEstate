@@ -325,23 +325,30 @@ exports.deletePropertyById = async (id) => {
   return result.rows[0] || null;
 };
 
-// ✅ Get all properties with wishlistedBy (array of user_ids)
 exports.getAllPropertiesWithWishlist = async () => {
-  const result = await pool.query(`
-    SELECT 
-      p.*,
-      COALESCE(
-        ARRAY_AGG(w.user_id) FILTER (WHERE w.user_id IS NOT NULL),
-        '{}'
-      ) AS wishlisted_by
-    FROM properties p
-    LEFT JOIN wishlist w ON p.id = w.property_id
-    GROUP BY p.id
-    ORDER BY p.listed_at DESC;
-  `);
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.*,
+        COALESCE(
+          ARRAY_AGG(w.user_id) FILTER (WHERE w.user_id IS NOT NULL),
+          '{}'
+        ) AS wishlisted_by
+      FROM properties p
+      LEFT JOIN wishlist w ON p.id = w.property_id
+      WHERE p.id IS NOT NULL AND p.id::text ~ '^[0-9]+$'  -- ✅ filter out invalid IDs
+      GROUP BY p.id
+      ORDER BY p.listed_at DESC;
+    `);
 
-  return result.rows.map((row) => ({
-    ...row,
-    wishlistedBy: row.wishlisted_by, // ✅ cleaner key for frontend
-  }));
+    return result.rows
+      .filter((row) => Number.isInteger(row.id)) // ✅ ensure `id` is safe
+      .map((row) => ({
+        ...row,
+        wishlistedBy: row.wishlisted_by,
+      }));
+  } catch (err) {
+    console.error("❌ DB Error in getAllPropertiesWithWishlist:", err);
+    throw new Error("Internal Server Error while fetching wishlist properties");
+  }
 };

@@ -435,6 +435,13 @@ exports.getPropertiesWithWishlist = async (req, res) => {
   try {
     const properties = await propertyModel.getAllPropertiesWithWishlist();
 
+    // Debug log
+    properties.forEach((p) => {
+      if (!Number.isInteger(p.id)) {
+        console.warn("⚠️ Invalid property ID found in DB:", p.id);
+      }
+    });
+
     res.status(200).json({
       message: "Properties with wishlist fetched successfully",
       data: properties,

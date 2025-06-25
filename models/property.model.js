@@ -331,22 +331,21 @@ exports.getAllPropertiesWithWishlist = async () => {
       SELECT 
         p.*,
         COALESCE(
-          ARRAY_AGG(w.user_id) FILTER (WHERE w.user_id IS NOT NULL),
-          '{}'
+          JSON_AGG(w.user_id) FILTER (WHERE w.user_id IS NOT NULL),
+          '[]'
         ) AS wishlisted_by
       FROM properties p
-      LEFT JOIN wishlist w ON p.id = w.property_id
-      WHERE p.id IS NOT NULL AND p.id::text ~ '^[0-9]+$'  -- ✅ filter out invalid IDs
+      LEFT JOIN wishlist w 
+        ON p.id = w.property_id
+      WHERE p.id IS NOT NULL
       GROUP BY p.id
       ORDER BY p.listed_at DESC;
     `);
 
-    return result.rows
-      .filter((row) => Number.isInteger(row.id)) // ✅ ensure `id` is safe
-      .map((row) => ({
-        ...row,
-        wishlistedBy: row.wishlisted_by,
-      }));
+    return result.rows.map((row) => ({
+      ...row,
+      wishlistedBy: row.wishlisted_by,
+    }));
   } catch (err) {
     console.error("❌ DB Error in getAllPropertiesWithWishlist:", err);
     throw new Error("Internal Server Error while fetching wishlist properties");

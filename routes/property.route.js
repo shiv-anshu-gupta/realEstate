@@ -15,7 +15,7 @@ router.post(
   verifyUser,
   propertyController.createProperty
 );
-
+router.get("/count", propertyController.getTotalPropertyCount);
 router.get("/", propertyController.getAllProperties);
 
 router.get("/recent", propertyController.getRecentProperties);

@@ -71,3 +71,19 @@ exports.removeFromWishlist = async (req, res) => {
     res.status(500).json({ error: "Failed to remove from wishlist" });
   }
 };
+
+exports.countWishlist = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await pool.query(`SELECT COUNT(*) FROM wishlist`);
+
+    res.status(200).json({
+      message: "Wishlist count fetched successfully",
+      count: parseInt(result.rows[0].count, 10),
+    });
+  } catch (err) {
+    console.error("Error counting wishlist:", err);
+    res.status(500).json({ error: "Failed to count wishlist" });
+  }
+};

@@ -102,14 +102,21 @@ exports.getAllProperties = async () => {
 
 // ✅ Get latest 3 properties
 exports.getRecentProperties = async () => {
-  const result = await pool.query(`
-    SELECT 
-      id, title, city, state, price, images, listed_at
-    FROM properties
-    ORDER BY listed_at DESC
-    LIMIT 3;
-  `);
-  return result.rows;
+  try {
+    const result = await pool.query(`
+      SELECT 
+        id, title, description, city, state, country, price, images, listed_at,
+        type, sub_type, bedrooms, bathrooms, area
+      FROM properties
+      ORDER BY listed_at DESC
+      LIMIT 3;
+    `);
+
+    return result.rows;
+  } catch (err) {
+    console.error("❌ DB Error in getRecentProperties:", err);
+    throw new Error("Failed to fetch recent properties");
+  }
 };
 
 // Build search query
@@ -349,5 +356,17 @@ exports.getAllPropertiesWithWishlist = async () => {
   } catch (err) {
     console.error("❌ DB Error in getAllPropertiesWithWishlist:", err);
     throw new Error("Internal Server Error while fetching wishlist properties");
+  }
+};
+
+exports.countAllProperties = async () => {
+  try {
+    console.log("📊 Counting all properties...");
+    const result = await pool.query("SELECT COUNT(*) FROM properties;");
+    console.log("✅ Result:", result.rows[0]);
+    return parseInt(result.rows[0].count, 10);
+  } catch (err) {
+    console.error("❌ DB Error in countAllProperties:", err);
+    throw err;
   }
 };

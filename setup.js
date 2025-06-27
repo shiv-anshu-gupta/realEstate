@@ -82,7 +82,18 @@ async function createTables() {
         UNIQUE(user_id, property_id) -- prevents duplicate wishlists
       );
     `);
+    await pool.query(`DROP TABLE IF EXISTS messages;`);
 
+    await pool.query(`
+  CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
     console.log("✅ Tables created/ensured successfully.");
   } catch (err) {
     console.error("❌ Error creating tables:", err);

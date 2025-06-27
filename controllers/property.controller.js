@@ -454,3 +454,20 @@ exports.getPropertiesWithWishlist = async (req, res) => {
     });
   }
 };
+
+exports.getTotalPropertyCount = async (req, res) => {
+  try {
+    console.log("📥 Count request received");
+    const totalCount = await propertyModel.countAllProperties();
+    res.status(200).json({
+      message: "Total properties count fetched successfully",
+      count: totalCount,
+    });
+  } catch (err) {
+    console.error("❌ Controller Error in getTotalPropertyCount:", err);
+    res.status(500).json({
+      error: "Failed to fetch property count",
+      message: err.message,
+    });
+  }
+};

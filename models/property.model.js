@@ -137,7 +137,7 @@ const buildSearchQuery = (filters) => {
 
   if (filters.sub_type) {
     values.push(filters.sub_type.toLowerCase());
-    where.push(`sub_type = $${values.length}`);
+    where.push(`LOWER(sub_type) = $${values.length}`);
   }
 
   if (filters.location) {

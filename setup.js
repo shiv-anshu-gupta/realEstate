@@ -67,34 +67,48 @@ async function createTables() {
         tour_date DATE NOT NULL,
         tour_time TIME NOT NULL,
         message TEXT,
-        status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+        status TEXT DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // ✅ WISHLIST table
+    // WISHLIST table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS wishlist (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, property_id) -- prevents duplicate wishlists
+        UNIQUE(user_id, property_id)
       );
     `);
-    await pool.query(`DROP TABLE IF EXISTS messages;`);
 
+    // MESSAGES table
     await pool.query(`
-  CREATE TABLE messages (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone TEXT,
-    message TEXT NOT NULL,
-    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-`);
-    console.log("✅ Tables created/ensured successfully.");
+      CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        message TEXT NOT NULL,
+        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // ✅ TESTIMONIALS table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS testimonials (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        location TEXT,
+        message TEXT NOT NULL,
+        rating INTEGER CHECK (rating BETWEEN 1 AND 5) DEFAULT 5,
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("✅ All tables created or ensured successfully.");
   } catch (err) {
     console.error("❌ Error creating tables:", err);
   } finally {

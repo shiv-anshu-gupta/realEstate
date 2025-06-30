@@ -156,7 +156,7 @@ exports.searchProperties = async (req, res) => {
       propertyModel.searchProperties(filters, skip, parseInt(limit)),
       propertyModel.countFilteredProperties(filters),
     ]);
-
+    console.log("📥 Search filters:", filters);
     res.status(200).json({
       message: "Properties fetched successfully",
       data: properties,
@@ -380,7 +380,7 @@ exports.getOfficeProperties = async (req, res) => {
 exports.getAggreculturalProperties = async (req, res) => {
   try {
     const agProps = await propertyModel.searchProperties({
-      sub_type: "aggricultural",
+      sub_type: "Agricultural Land",
     });
     res.status(200).json({
       message: "Aggrecultural properties fetched successfully",
@@ -398,7 +398,7 @@ exports.getAggreculturalProperties = async (req, res) => {
 exports.getPlotProperties = async (req, res) => {
   try {
     const plotProps = await propertyModel.searchProperties({
-      sub_type: "plots",
+      sub_type: "plot",
     });
     res.status(200).json({
       message: "Plot properties fetched successfully",

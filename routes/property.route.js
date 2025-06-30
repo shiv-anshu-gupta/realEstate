@@ -45,7 +45,7 @@ router.get("/listings/office", (req, res) =>
 
 router.get("/listings/aggricultural", (req, res) =>
   propertyController.searchProperties(
-    { ...req, query: { ...req.query, sub_type: "aggricultural" } },
+    { ...req, query: { ...req.query, sub_type: "Agricultural Land" } },
     res
   )
 );

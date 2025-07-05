@@ -30,23 +30,25 @@ exports.insertProperty = async (propertyData) => {
       email,
       phone,
       user_id,
-      nearby, // ✅ optional new field
+      nearby,
+      beegha,
+      acres,
     } = propertyData;
-
-    console.log("📦 Inserting property data:", propertyData);
 
     const result = await pool.query(
       `INSERT INTO properties (
-        title, description, status, type, sub_type, rooms, area, price,
-        images, video, floor_plan, address, city, state, country, latitude, longitude,
-        age, bedrooms, bathrooms, features,
-        name, username, email, phone, user_id, nearby
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8,
-        $9, $10, $11, $12, $13, $14, $15, $16, $17,
-        $18, $19, $20, $21,
-        $22, $23, $24, $25, $26, $27
-      ) RETURNING *;`,
+    title, description, status, type, sub_type, rooms, area, price,
+    images, video, floor_plan, address, city, state, country, latitude, longitude,
+    age, bedrooms, bathrooms, features,
+    name, username, email, phone, user_id, nearby,
+    beegha, acres              
+  ) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8,
+    $9, $10, $11, $12, $13, $14, $15, $16, $17,
+    $18, $19, $20, $21,
+    $22, $23, $24, $25, $26, $27,
+    $28, $29                     
+  ) RETURNING *;`,
       [
         title,
         description,
@@ -75,6 +77,8 @@ exports.insertProperty = async (propertyData) => {
         phone,
         user_id,
         nearby || null,
+        beegha || null,
+        acres || null,
       ]
     );
 
@@ -89,12 +93,13 @@ exports.insertProperty = async (propertyData) => {
 exports.getAllProperties = async () => {
   const result = await pool.query(`
     SELECT 
-      id, title, description, status, type, sub_type, rooms, area, price,
-      images, video, floor_plan, address, city, state, country, latitude, longitude,
-      age, bedrooms, bathrooms, features,
-      name, username, email, phone,
-      user_id, listed_at, nearby
-    FROM properties
+  id, title, description, status, type, sub_type, rooms, area, price,
+  images, video, floor_plan, address, city, state, country, latitude, longitude,
+  age, bedrooms, bathrooms, features,
+  name, username, email, phone,
+  user_id, listed_at, nearby,
+  beegha, acres              
+  FROM properties
     ORDER BY listed_at DESC;
   `);
   return result.rows;
@@ -257,35 +262,38 @@ exports.updatePropertyById = async (id, data) => {
   const result = await pool.query(
     `
     UPDATE properties SET
-      title = $1,
-      description = $2,
-      status = $3,
-      type = $4,
-      sub_type = $5,
-      rooms = $6,
-      area = $7,
-      price = $8,
-      images = $9,
-      video = $10,
-      floor_plan = $11,
-      address = $12,
-      city = $13,
-      state = $14,
-      country = $15,
-      latitude = $16,
-      longitude = $17,
-      age = $18,
-      bedrooms = $19,
-      bathrooms = $20,
-      features = $21,
-      name = $22,
-      username = $23,
-      email = $24,
-      phone = $25,
-      user_id = $26,
-      nearby = $27
-    WHERE id = $28
-    RETURNING *;
+  title = $1,
+  description = $2,
+  status = $3,
+  type = $4,
+  sub_type = $5,
+  rooms = $6,
+  area = $7,
+  price = $8,
+  images = $9,
+  video = $10,
+  floor_plan = $11,
+  address = $12,
+  city = $13,
+  state = $14,
+  country = $15,
+  latitude = $16,
+  longitude = $17,
+  age = $18,
+  bedrooms = $19,
+  bathrooms = $20,
+  features = $21,
+  name = $22,
+  username = $23,
+  email = $24,
+  phone = $25,
+  user_id = $26,
+  nearby = $27,
+  beegha = $28,               
+  acres = $29                 
+WHERE id = $30
+RETURNING *;
+
     `,
     [
       title,
@@ -315,6 +323,8 @@ exports.updatePropertyById = async (id, data) => {
       phone,
       user_id,
       nearby,
+      beegha || null, // ✅ Added
+      acres || null,
       id,
     ]
   );

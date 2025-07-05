@@ -10,6 +10,8 @@ const propertySchema = z.object({
   rooms: z.coerce.number().min(1).optional(),
   area: z.coerce.number().min(1),
   price: z.coerce.number().min(0),
+  beegha: z.coerce.number().optional(),
+  acres: z.coerce.number().optional(),
   images: z.array(z.string()).optional(),
   video: z.string().nullable().optional(),
   floor_plan: z.string().nullable().optional(),
@@ -64,7 +66,6 @@ exports.createProperty = async (req, res) => {
       floor_plan: floorPlanUrl,
     };
 
-    // ✅ Parse JSON strings (like nearby, features) to objects/arrays
     ["nearby", "features"].forEach((key) => {
       if (typeof propertyData[key] === "string") {
         try {
@@ -78,19 +79,25 @@ exports.createProperty = async (req, res) => {
       }
     });
 
-    // ✅ Handle optional numeric fields passed as empty strings
-    ["rooms", "bedrooms", "bathrooms", "age", "latitude", "longitude"].forEach(
-      (field) => {
-        if (propertyData[field] === "") {
-          propertyData[field] = undefined;
-        }
+    // Handle optional numeric fields passed as empty strings
+    [
+      "rooms",
+      "bedrooms",
+      "bathrooms",
+      "age",
+      "latitude",
+      "longitude",
+      "beegha",
+      "acres",
+    ].forEach((field) => {
+      if (propertyData[field] === "") {
+        propertyData[field] = undefined;
       }
-    );
+    });
 
     console.log("✅ Parsed propertyData:");
     console.dir(propertyData, { depth: null });
 
-    // ✅ Validate data
     const validatedData = propertySchema.parse(propertyData);
 
     const newProperty = await propertyModel.insertProperty(validatedData);
@@ -276,7 +283,6 @@ exports.updateProperty = async (req, res) => {
       floor_plan: floorPlanUrl || req.body.floor_plan,
     };
 
-    // Parse JSON fields
     ["nearby", "features", "images"].forEach((key) => {
       if (typeof propertyData[key] === "string") {
         try {
@@ -289,16 +295,21 @@ exports.updateProperty = async (req, res) => {
       }
     });
 
-    // Remove empty numeric fields
-    ["rooms", "bedrooms", "bathrooms", "age", "latitude", "longitude"].forEach(
-      (field) => {
-        if (propertyData[field] === "") {
-          propertyData[field] = undefined;
-        }
+    [
+      "rooms",
+      "bedrooms",
+      "bathrooms",
+      "age",
+      "latitude",
+      "longitude",
+      "beegha",
+      "acres",
+    ].forEach((field) => {
+      if (propertyData[field] === "") {
+        propertyData[field] = undefined;
       }
-    );
+    });
 
-    // Validate updated data
     const validatedData = propertySchema.parse(propertyData);
 
     const updated = await propertyModel.updatePropertyById(id, validatedData);

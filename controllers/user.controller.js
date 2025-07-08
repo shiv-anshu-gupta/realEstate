@@ -12,36 +12,31 @@ exports.loginWithPhone = async (req, res) => {
       return res.status(400).json({ error: "Phone number is required." });
     }
 
-    // 🔍 Check if user exists
     let user = await userModel.findByPhone(phone);
-
     let isNewUser = false;
 
-    // 👤 If not exists, create new
     if (!user) {
       user = await userModel.createUser({
+        name: name || "User",
         phone,
-        name: name || "User", // fallback
       });
       isNewUser = true;
     }
 
-    // 🔐 Generate JWT
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
     const isProd = process.env.NODE_ENV === "production";
 
-    // 🍪 Set token in cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "None" : "Lax",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: isNewUser
         ? "✅ User registered successfully"
         : "✅ Login successful",
@@ -55,10 +50,11 @@ exports.loginWithPhone = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Login error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
+// Get Profile
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user?.userId;
@@ -73,12 +69,12 @@ exports.getProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "User profile fetched successfully",
       user,
     });
   } catch (error) {
     console.error("❌ Profile fetch error:", error);
-    return res.status(500).json({ error: "Failed to fetch profile" });
+    res.status(500).json({ error: "Failed to fetch profile" });
   }
 };

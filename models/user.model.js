@@ -1,33 +1,31 @@
 const pool = require("../connect");
-const bcrypt = require("bcrypt");
 
-// Create new user
-exports.createUser = async ({ name, email, password, phone, role }) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-
+// ✅ Create new user by name and phone (role is defaulted to 'buyer' in DB)
+exports.createUser = async ({ name, phone }) => {
   const result = await pool.query(
-    `INSERT INTO users (name, email, password, phone, role)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id, name, email, role, phone, created_at`,
-    [name, email, hashedPassword, phone, role]
+    `INSERT INTO users (name, phone)
+     VALUES ($1, $2)
+     RETURNING id, name, phone, role, created_at`,
+    [name, phone]
   );
 
   return result.rows[0];
 };
 
-// Find user by email
-exports.findByEmail = async (email) => {
-  const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
-    email,
-  ]);
+// ✅ Find user by phone number
+exports.findByPhone = async (phone) => {
+  const result = await pool.query(
+    `SELECT id, name, phone, role, created_at FROM users WHERE phone = $1`,
+    [phone]
+  );
 
   return result.rows[0];
 };
 
-// Find user by ID
+// ✅ Find user by ID
 exports.findById = async (id) => {
   const result = await pool.query(
-    `SELECT id, name, email, phone, role FROM users WHERE id = $1`,
+    `SELECT id, name, phone, role, created_at FROM users WHERE id = $1`,
     [id]
   );
 

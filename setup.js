@@ -2,19 +2,17 @@ const pool = require("./connect.js");
 
 async function createTables() {
   try {
-    // USERS table
+    await pool.query(`DROP TABLE IF EXISTS users CASCADE;`);
+
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        address TEXT,
-        phone TEXT,
-        role TEXT DEFAULT 'buyer',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'buyer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
 
     // PROPERTIES table
     await pool.query(`

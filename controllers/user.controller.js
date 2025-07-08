@@ -1,87 +1,67 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const userModel = require("../models/user.model");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-// Register Controller
-exports.register = async (req, res) => {
+// 📱 Login or Register using phone number
+exports.loginWithPhone = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { phone, name } = req.body;
 
-    // Check if user already exists
-    const existingUser = await userModel.findByEmail(email);
-    if (existingUser) {
-      return res.status(409).json({ error: "Email already in use." });
+    if (!phone) {
+      return res.status(400).json({ error: "Phone number is required." });
     }
 
-    // Create new user
-    const user = await userModel.createUser({
-      name,
-      email,
-      password,
-      phone,
-      role,
-    });
+    // 🔍 Check if user exists
+    let user = await userModel.findByPhone(phone);
 
-    res.status(201).json({
-      message: "User registered successfully",
-      user,
-    });
-  } catch (error) {
-    console.error("❌ Register error:", error);
-    res.status(500).json({ error: "Failed to register user" });
-  }
-};
+    let isNewUser = false;
 
-// Login Controller
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await userModel.findByEmail(email);
+    // 👤 If not exists, create new
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      user = await userModel.createUser({
+        phone,
+        name: name || "User", // fallback
+      });
+      isNewUser = true;
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+    // 🔐 Generate JWT
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
     const isProd = process.env.NODE_ENV === "production";
-    // Optionally set cookie
+
+    // 🍪 Set token in cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProd, // false on localhost, true on production
+      secure: isProd,
       sameSite: isProd ? "None" : "Lax",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    res.status(200).json({
-      message: "Login successful",
+    return res.status(200).json({
+      message: isNewUser
+        ? "✅ User registered successfully"
+        : "✅ Login successful",
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
         phone: user.phone,
         role: user.role,
       },
       token,
     });
-  } catch (error) {
-    console.error("❌ Login error:", error);
-    res.status(500).json({ error: "Login failed" });
+  } catch (err) {
+    console.error("❌ Login error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.user?.userId; // Populated by verifyToken middleware
+    const userId = req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized access" });
@@ -93,12 +73,12 @@ exports.getProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "User profile fetched successfully",
       user,
     });
   } catch (error) {
-    console.error("❌ Error fetching user profile:", error);
-    res.status(500).json({ error: "Failed to fetch profile" });
+    console.error("❌ Profile fetch error:", error);
+    return res.status(500).json({ error: "Failed to fetch profile" });
   }
 };

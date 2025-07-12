@@ -1,6 +1,6 @@
 const { z } = require("zod");
 const propertyModel = require("../models/property.model");
-
+const pool = require("../connect");
 const propertySchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10).max(5000),
@@ -79,7 +79,6 @@ exports.createProperty = async (req, res) => {
       }
     });
 
-    // Handle optional numeric fields passed as empty strings
     [
       "rooms",
       "bedrooms",
@@ -95,17 +94,107 @@ exports.createProperty = async (req, res) => {
       }
     });
 
-    console.log("✅ Parsed propertyData:");
-    console.dir(propertyData, { depth: null });
-
     const validatedData = propertySchema.parse(propertyData);
 
-    const newProperty = await propertyModel.insertProperty(validatedData);
+    const userRole = req.user?.role;
+    const userId = req.user?.userId;
+    console.log("📥 User role and id:", userRole, userId);
+    if (!userRole || !userId) {
+      return res.status(401).json({ error: "Unauthorized request" });
+    }
 
-    res.status(201).json({
-      message: "Property created successfully",
-      data: newProperty,
-    });
+    if (userRole === "superadmin") {
+      // ✅ Direct insert to properties table
+      const newProperty = await propertyModel.insertProperty(validatedData);
+
+      return res.status(201).json({
+        message: "Property created successfully",
+        data: newProperty,
+      });
+    } else {
+      // 📨 Insert into property_requests table
+      const {
+        title,
+        description,
+        type,
+        sub_type,
+        rooms,
+        area,
+        price,
+        beegha,
+        acres,
+        images,
+        video,
+        floor_plan,
+        address,
+        city,
+        state,
+        country,
+        latitude,
+        longitude,
+        age,
+        bedrooms,
+        bathrooms,
+        features,
+        nearby,
+        name,
+        username,
+        email,
+        phone,
+        status,
+      } = validatedData;
+
+      await pool.query(
+        `INSERT INTO property_requests (
+          user_id, title, description, type, sub_type, rooms, area, price,
+          beegha, acres, images, video, floor_plan,
+          address, city, state, country, latitude, longitude,
+          age, bedrooms, bathrooms, features, nearby,
+          name, username, email, phone, status
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8,
+          $9, $10, $11, $12, $13,
+          $14, $15, $16, $17, $18, $19,
+          $20, $21, $22, $23, $24,
+          $25, $26, $27, $28, $29
+        )`,
+        [
+          userId,
+          title,
+          description,
+          type,
+          sub_type,
+          rooms,
+          area,
+          price,
+          beegha,
+          acres,
+          images,
+          video,
+          floor_plan,
+          address,
+          city,
+          state,
+          country,
+          latitude,
+          longitude,
+          age,
+          bedrooms,
+          bathrooms,
+          features,
+          JSON.stringify(nearby || []),
+          name,
+          username,
+          email,
+          phone,
+          status || "pending",
+        ]
+      );
+
+      return res.status(201).json({
+        message: "Property request submitted successfully",
+      });
+    }
   } catch (err) {
     if (err.name === "ZodError") {
       console.error("❌ Zod validation failed:", err.errors);

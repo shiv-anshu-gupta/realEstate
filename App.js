@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const wishlistRoutes = require("./routes/wishlist.routes");
+const adminRoutes = require("./routes/admin.route");
 // 🌐 Parse allowed origins from .env
 const allowedOrigins = process.env.FRONTEND_URLS
   ? process.env.FRONTEND_URLS.split(",").map((url) => url.trim())
@@ -53,6 +54,7 @@ app.use("/contact", contactRoute);
 app.use("/Inquiry", inquiryRoute);
 app.use("/tour", tourRoute);
 app.use("/wishlist", wishlistRoutes);
+app.use("/admin", adminRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });

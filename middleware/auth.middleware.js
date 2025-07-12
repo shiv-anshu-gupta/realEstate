@@ -21,6 +21,7 @@ exports.verifyUser = (req, res, next) => {
         });
       }
       req.user = decoded;
+      console.log("✅ User verified:", req.user);
       next();
     });
   } catch (error) {

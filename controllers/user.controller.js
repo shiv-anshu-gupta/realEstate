@@ -23,7 +23,7 @@ exports.loginWithPhone = async (req, res) => {
       isNewUser = true;
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: "1d",
     });
 

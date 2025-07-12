@@ -106,6 +106,42 @@ async function createTables() {
       );
     `);
 
+    await pool.query(`
+  CREATE TABLE IF NOT EXISTS property_requests (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT DEFAULT 'pending', -- pending | approved | rejected
+    type TEXT CHECK (type IN ('rent', 'sale')) NOT NULL,
+    sub_type TEXT,
+    rooms INTEGER,
+    area TEXT,
+    price INTEGER NOT NULL,
+    beegha INTEGER,
+    acres INTEGER,
+    images TEXT[],
+    video TEXT,
+    floor_plan TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    country TEXT,
+    latitude TEXT,
+    longitude TEXT,
+    age INTEGER,
+    bedrooms INTEGER,
+    bathrooms INTEGER,
+    features TEXT[],
+    nearby JSONB,
+    name TEXT,
+    username TEXT,
+    email TEXT,
+    phone TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
     console.log("✅ All tables created or ensured successfully.");
   } catch (err) {
     console.error("❌ Error creating tables:", err);

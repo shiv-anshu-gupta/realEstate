@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-const OWNER_PHONE = process.env.OWNER_PHONE || "7440248190";
+const OWNER_PHONES = process.env.OWNER_PHONES?.split(",") || ["7440248190"];
 const OWNER_PASSWORD = process.env.OWNER_PASSWORD || "owner@123";
 
 // 📱 Login or Register using phone number
@@ -14,10 +14,10 @@ exports.loginWithPhone = async (req, res) => {
       return res.status(400).json({ error: "Phone number is required." });
     }
 
-    // ❌ Prevent login with superadmin number here
-    if (phone === OWNER_PHONE) {
+    // ❌ Prevent login with superadmin numbers
+    if (OWNER_PHONES.includes(phone)) {
       return res.status(403).json({
-        error: "This number is restricted. you cannot use this number",
+        error: "This number is restricted. You cannot use this number.",
       });
     }
 
@@ -75,12 +75,11 @@ exports.loginWithSecret = async (req, res) => {
         .json({ error: "Phone and password are required." });
     }
 
-    // ✅ Only allow access if phone and password match .env
-    if (phone !== OWNER_PHONE || password !== OWNER_PASSWORD) {
+    // ✅ Allow only if phone is in allowed list and password matches
+    if (!OWNER_PHONES.includes(phone) || password !== OWNER_PASSWORD) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Create or find superadmin user in DB
     let user = await userModel.findByPhone(phone);
 
     if (!user) {

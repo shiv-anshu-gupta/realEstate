@@ -1,15 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const userController = require("../controllers/user.controller"); // ✅ rename to match updated controller
-const { verifyUser } = require("../middleware/auth.middleware"); // ✅ renamed for clarity
+const userController = require("../controllers/user.controller"); // ✅ Using updated controller
+const { verifyUser } = require("../middleware/auth.middleware"); // ✅ For protected routes
 
-// ✅ Login or register with phone number
+// ✅ Login or Register with phone number
 router.post("/login", userController.loginWithPhone);
 
-// ✅ Get user profile (protected route)
+// ✅ Secret route for superadmin login
+router.post("/secret", userController.loginWithSecret); // 🔐 secret login with env password
+
+// ✅ Get user profile (protected)
 router.get("/profile", verifyUser, userController.getProfile);
 
-// ✅ Logout route
+// ✅ Logout
 router.post("/logout", (req, res) => {
   const isProd = process.env.NODE_ENV === "production";
 
